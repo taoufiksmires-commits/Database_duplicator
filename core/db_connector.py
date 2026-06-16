@@ -8,12 +8,28 @@ class DBConnector:
         self.cursor = None
 
     def connect(self):
+        db_name = self.cfg["database"]
+        tmp = mysql.connector.connect(
+            host=self.cfg["host"],
+            port=self.cfg.get("port", 3306),
+            user=self.cfg["user"],
+            password=self.cfg["password"],
+            connection_timeout=5
+        )
+        tmp_cursor = tmp.cursor()
+        tmp_cursor.execute(
+            f"CREATE DATABASE IF NOT EXISTS `{db_name}` "
+            f"CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+        )
+        tmp_cursor.close()
+        tmp.close()
+
         self.conn = mysql.connector.connect(
             host=self.cfg["host"],
             port=self.cfg.get("port", 3306),
             user=self.cfg["user"],
             password=self.cfg["password"],
-            database=self.cfg["database"],
+            database=db_name,
             connection_timeout=5
         )
         self.cursor = self.conn.cursor(dictionary=True)
@@ -41,7 +57,6 @@ class DBConnector:
         return [r["COLUMN_NAME"] for r in self.cursor.fetchall()]
 
     def get_schema_signature(self, table_name):
-        """Retourne une signature du schéma : liste ordonnée col:type."""
         self.cursor.execute(
             "SELECT COLUMN_NAME, COLUMN_TYPE FROM information_schema.columns "
             "WHERE table_schema = %s AND table_name = %s ORDER BY ORDINAL_POSITION",
@@ -59,12 +74,14 @@ class DBConnector:
         self.cursor.execute(f"SELECT * FROM `{table_name}`")
         return self.cursor.fetchall()
 
-    def fetch_updated_rows(self, table_name, ts_col, since):
-        self.cursor.execute(
-            f"SELECT * FROM `{table_name}` WHERE `{ts_col}` > %s",
-            (since,)
-        )
+    def fetch_rows_by_ids(self, table_name, pk, ids):
+        fmt = ",".join(["%s"] * len(ids))
+        self.cursor.execute(f"SELECT * FROM `{table_name}` WHERE `{pk}` IN ({fmt})", ids)
         return self.cursor.fetchall()
+
+    def fetch_all_pks(self, table_name, pk):
+        self.cursor.execute(f"SELECT `{pk}` FROM `{table_name}`")
+        return {r[pk] for r in self.cursor.fetchall()}
 
     def upsert_rows(self, table_name, columns, rows):
         cols_escaped = ", ".join(f"`{c}`" for c in columns)

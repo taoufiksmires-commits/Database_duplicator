@@ -1,23 +1,37 @@
 {
-  "source": {
-    "host": "127.0.0.1",
+  "pairs": [
+    {
+      "id": "paire_1",
+      "name": "Ma première sync",
+      "enabled": true,
+      "source": {
+        "host": "127.0.0.1",
+        "port": 3306,
+        "user": "root",
+        "password": "Parfait1804",
+        "database": "database_management_source",
+        "table": "new_table",
+        "primary_key": "id"
+      },
+      "destination": {
+        "host": "127.0.0.1",
+        "port": 3306,
+        "user": "root",
+        "password": "Parfait1804",
+        "database": "database_management_destination",
+        "table_prefix": "new_table",
+        "current_version": 2
+      }
+    }
+  ],
+  "history": {
+    "host": "192.168.1.20",
     "port": 3306,
     "user": "root",
-    "password": "Parfait1804",
-    "database": "database_management_source",
-    "table": "new_table"
-  },
-  "destination": {
-    "host": "127.0.0.1",
-    "port": 3306,
-    "user": "root",
-    "password": "Parfait1804",
-    "database": "database_management_destination",
-    "table_prefix": "new_table",
-    "current_version": 1
+    "password": "",
+    "database": "mysqlsync_history"
   },
   "sync": {
-    "interval_seconds": 5,
-    "polling_column": "updated_at"
+    "interval_seconds": 5
   }
 }
