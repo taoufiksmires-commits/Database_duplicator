@@ -1,0 +1,23 @@
+{
+  "source": {
+    "host": "127.0.0.1",
+    "port": 3306,
+    "user": "root",
+    "password": "Parfait1804",
+    "database": "database_management_source",
+    "table": "new_table"
+  },
+  "destination": {
+    "host": "127.0.0.1",
+    "port": 3306,
+    "user": "root",
+    "password": "Parfait1804",
+    "database": "database_management_destination",
+    "table_prefix": "new_table",
+    "current_version": 1
+  },
+  "sync": {
+    "interval_seconds": 5,
+    "polling_column": "updated_at"
+  }
+}
