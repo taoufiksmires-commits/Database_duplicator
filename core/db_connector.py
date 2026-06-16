@@ -70,13 +70,13 @@ class DBConnector:
         row = self.cursor.fetchone()
         return row["Create Table"]
 
-    def fetch_all_rows(self, table_name):
-        self.cursor.execute(f"SELECT * FROM `{table_name}`")
-        return self.cursor.fetchall()
-
-    def fetch_rows_by_ids(self, table_name, pk, ids):
-        fmt = ",".join(["%s"] * len(ids))
-        self.cursor.execute(f"SELECT * FROM `{table_name}` WHERE `{pk}` IN ({fmt})", ids)
+    def fetch_all_rows(self, table_name, pk=None, from_id=None):
+        if pk and from_id is not None:
+            self.cursor.execute(
+                f"SELECT * FROM `{table_name}` WHERE `{pk}` >= %s", (from_id,)
+            )
+        else:
+            self.cursor.execute(f"SELECT * FROM `{table_name}`")
         return self.cursor.fetchall()
 
     def fetch_all_pks(self, table_name, pk):
@@ -94,6 +94,30 @@ class DBConnector:
         for row in rows:
             values = [row.get(c) for c in columns]
             self.cursor.execute(sql, values)
+        self.conn.commit()
+
+    def rename_table(self, old_name, new_name):
+        self.cursor.execute(f"RENAME TABLE `{old_name}` TO `{new_name}`")
+        self.conn.commit()
+
+    def rename_database(self, old_db, new_db):
+        """
+        MySQL ne supporte pas RENAME DATABASE.
+        On déplace toutes les tables vers la nouvelle BDD puis supprime l'ancienne.
+        """
+        self.cursor.execute(
+            f"CREATE DATABASE IF NOT EXISTS `{new_db}` "
+            f"CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+        )
+        self.cursor.execute(
+            "SELECT table_name FROM information_schema.tables WHERE table_schema=%s",
+            (old_db,)
+        )
+        tables = [r["table_name"] for r in self.cursor.fetchall()]
+        for t in tables:
+            self.cursor.execute(f"RENAME TABLE `{old_db}`.`{t}` TO `{new_db}`.`{t}`")
+        self.conn.commit()
+        self.cursor.execute(f"DROP DATABASE IF EXISTS `{old_db}`")
         self.conn.commit()
 
     def execute_raw(self, sql):

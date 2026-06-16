@@ -1,3 +1,4 @@
 {
-  "paire_1": "id:int unsigned|Date:varchar(45)|temperature:int"
+  "paire_1": "id:int unsigned|Date:varchar(45)|temperature:int",
+  "6c4d7c25": "id:int unsigned|Date:varchar(45)|temperature:int"
 }

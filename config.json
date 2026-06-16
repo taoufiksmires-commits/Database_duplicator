@@ -22,6 +22,29 @@
         "table_prefix": "new_table",
         "current_version": 2
       }
+    },
+    {
+      "id": "1e342d51",
+      "name": "Nouvelle paire",
+      "enabled": true,
+      "source": {
+        "host": "",
+        "port": 3306,
+        "user": "root",
+        "password": "",
+        "database": "",
+        "table": "",
+        "primary_key": "id"
+      },
+      "destination": {
+        "host": "",
+        "port": 3306,
+        "user": "root",
+        "password": "",
+        "database": "",
+        "table_prefix": "sync_V",
+        "current_version": 1
+      }
     }
   ],
   "history": {
